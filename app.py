@@ -80,12 +80,12 @@ def user(target_id):
             existing_user["age"] = age
 
         return create_response({"user": existing_user}, 201, "Sucessfully updated user!")
+
     elif request.method == "DELETE":
         existing_user = db.getById("users", int(target_id))
         if existing_user is None:
             return create_response({}, 404, "User could not be found in database")
         db.deleteById("users", int(target_id))
-        return create_response({}, 200, "Sucessfully deleted user!")
 
 # part 1 and 3
 @app.route("/users", methods=["GET", "POST"])

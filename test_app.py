@@ -39,3 +39,11 @@ def test_get_user_id(client):
     res_user = res.json["result"]["user"]
     assert res_user["name"] == "Aria"
     assert res_user["age"] == 19
+
+def test_create_new_user(client):
+    res = client.post("/users/1")
+    assert res.status_code == 200
+
+    res_user = res.json["result"]["user"]
+    assert res_user["name"] == "Aria"
+    assert res_user["age"] == 19
