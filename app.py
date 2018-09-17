@@ -18,7 +18,6 @@ def create_response(
     IMPORTANT: data must be a dictionary where:
     - the key is the name of the type of data
     - the value is the data itself
-
     :param data <str> optional data
     :param status <int> optional status code, defaults to 200
     :param message <str> optional message
@@ -51,13 +50,19 @@ def mirror(name):
     data = {"name": name}
     return create_response(data)
 
-@app.route("/users")
-def all_users():
-    data = {"users": db.get("users")}
+
+# part 1 and 3
+@app.route("/users", methods=["GET"])
+def users():
+    team = request.args.get("team")
+    if not team:
+        data = {"users": db.get("users")}
+        return create_response(data)
+    users = db.get("users")
+    team_users = [u for u in users if u["team"] == team]
+    data = {"users": team_users}
     return create_response(data)
 
-
-# TODO: Implement the rest of the API here!
 
 """
 ~~~~~~~~~~~~ END API ~~~~~~~~~~~~
