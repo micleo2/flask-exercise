@@ -50,6 +50,16 @@ def mirror(name):
     data = {"name": name}
     return create_response(data)
 
+@app.route("/users/<target_id>")
+def user(target_id):
+    all_users = db.get("users")
+    ret_user = next((u for u in all_users if str(u["id"]) == target_id), None)
+
+    if ret_user is None:
+        return create_response({}, 404, "User could not be found in database")
+
+    return create_response({"user": ret_user})
+
 
 # part 1 and 3
 @app.route("/users", methods=["GET"])
