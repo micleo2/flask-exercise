@@ -50,29 +50,65 @@ def mirror(name):
     data = {"name": name}
     return create_response(data)
 
-@app.route("/users/<target_id>")
+@app.route("/users/<target_id>", methods=["GET", "PUT", "DELETE"])
 def user(target_id):
-    all_users = db.get("users")
-    ret_user = next((u for u in all_users if str(u["id"]) == target_id), None)
+    if request.method == "GET":
+        all_users = db.get("users")
+        ret_user = next((u for u in all_users if str(u["id"]) == target_id), None)
 
-    if ret_user is None:
-        return create_response({}, 404, "User could not be found in database")
+        if ret_user is None:
+            return create_response({}, 404, "User could not be found in database")
 
-    return create_response({"user": ret_user})
+        return create_response({"user": ret_user})
 
+    elif request.method == "PUT":
+        team = request.form["team"]
+        name = request.form["name"]
+        age = request.form["age"]
+
+        existing_user = db.getById("users", int(target_id))
+        if existing_user is None:
+            return create_response({}, 404, "User could not be found in database")
+
+        if team:
+            existing_user["team"] = team
+
+        if name:
+            existing_user["name"] = name
+
+        if age:
+            existing_user["age"] = age
+
+        return create_response({"user": existing_user}, 201, "Sucessfully updated user!")
+    elif request.method == "DELETE":
+        existing_user = db.getById("users", int(target_id))
+        if existing_user is None:
+            return create_response({}, 404, "User could not be found in database")
+        db.deleteById("users", int(target_id))
+        return create_response({}, 200, "Sucessfully deleted user!")
 
 # part 1 and 3
-@app.route("/users", methods=["GET"])
+@app.route("/users", methods=["GET", "POST"])
 def users():
-    team = request.args.get("team")
-    if not team:
-        data = {"users": db.get("users")}
+    if request.method == "GET":
+        team = request.args.get("team")
+        if not team:
+            data = {"users": db.get("users")}
+            return create_response(data)
+        users = db.get("users")
+        team_users = [u for u in users if u["team"] == team]
+        data = {"users": team_users}
         return create_response(data)
-    users = db.get("users")
-    team_users = [u for u in users if u["team"] == team]
-    data = {"users": team_users}
-    return create_response(data)
+    else:
+        team = request.form["team"]
+        name = request.form["name"]
+        age = request.form["age"]
+        if not team or not name or not age:
+            return create_response({}, 422, "Missing necesary info to create users!")
 
+        new_user = {"team": team, "name": name, "age": age}
+        db.create("users", new_user)
+        return create_response({"user": new_user}, 201, "Sucessfully created new user!")
 
 """
 ~~~~~~~~~~~~ END API ~~~~~~~~~~~~
